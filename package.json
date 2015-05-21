@@ -1,0 +1,51 @@
+{
+  "name": "mongoose-erase",
+  "version": "0.0.0",
+  "description": "Erase collections, models and schemas for unit testing with mongoose",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm run jshint && npm run jscs && mocha",
+    "jshint": "jshint **/*.js",
+    "jscs": "jscs **/*.js",
+    "coveralls": "mocha --require blanket -R mocha-lcov-reporter | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paperhive/mongoose-erase.git"
+  },
+  "keywords": [
+    "mongoose",
+    "test",
+    "testing",
+    "erase",
+    "clear",
+    "clean",
+    "wipe",
+    "delete"
+  ],
+  "author": "André Gaul <andre@gaul.io>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/paperhive/mongoose-erase/issues"
+  },
+  "homepage": "https://github.com/paperhive/mongoose-erase",
+  "devDependencies": {
+    "blanket": "^1.1.7",
+    "coveralls": "^2.11.2",
+    "jscs": "^1.13.1",
+    "jshint": "^2.7.0",
+    "mocha": "^2.2.5",
+    "mocha-lcov-reporter": "0.0.2",
+    "mongoose": "^4.0.3",
+    "should": "^6.0.3"
+  },
+  "config": {
+    "blanket": {
+      "data-cover-only": "src",
+      "data-cover-never": "node_modules"
+    }
+  },
+  "dependencies": {
+    "async": "^1.0.0"
+  }
+}
