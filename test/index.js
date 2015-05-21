@@ -9,11 +9,8 @@ describe('erase()', function() {
 
   before(function(done) {
     async.series([
-      // make sure that database is connected
-      function(cb) {
-        if (mongoose.connection.db) {return cb();}
-        mongoose.connect(dbURI, cb);
-      },
+      // make sure that database is connected and erase it
+      erase.connectAndErase(mongoose, dbURI),
       // add collection users
       function(cb) {
         var User = mongoose.model('User', new mongoose.Schema({
@@ -23,7 +20,7 @@ describe('erase()', function() {
       },
       // erase
       function(cb) {
-        erase(mongoose, cb);
+        erase.erase(mongoose, cb);
       }
     ], done);
   });
