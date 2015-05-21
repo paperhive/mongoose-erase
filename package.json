@@ -1,6 +1,6 @@
 {
   "name": "mongoose-erase",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Erase collections, models and schemas for unit testing with mongoose",
   "main": "src/index.js",
   "scripts": {
