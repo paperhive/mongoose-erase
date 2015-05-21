@@ -9,24 +9,11 @@ Erase collections, models and schemas for unit testing with mongoose
 With `mocha`, a unit test code that wipes the database before each test could look like this:
 ```javascript
 var mongoose = require('mongoose');
-var async = require('async');
 var erase = require('mongoose-erase');
 
 describe('yourFunction()', function() {
 
-  beforeEach(function(done) {
-    async.series([
-      // connect (if not yet done)
-      function(cb) {
-        if (mongoose.connection.db) return cb();
-        mongoose.connect('mongodb://localhost/test', cb);
-      },
-      // erase
-      function (cb) {
-        erase(mongoose, cb);
-      }
-    ], done);
-  });
+  beforeEach(erase.connectAndErase(mongoose, 'mongodb://localhost/test'));
 
   it('should do something', function() {});
 
