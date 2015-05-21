@@ -35,4 +35,11 @@ describe('erase()', function() {
       done();
     });
   });
+
+  it('should remove models', function() {
+    (function() {
+      mongoose.model('User');
+    }).should.throw();
+  });
+
 });
