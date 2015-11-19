@@ -36,16 +36,17 @@ function erase(mongoose, done) {
   ], done);
 }
 
-function connect(mongoose, dbURI, cb) {
+function connect(mongoose, dbURI, options, cb) {
   if (mongoose.connection.db) {return cb();}
-  mongoose.connect(dbURI, cb);
+  mongoose.connect(dbURI, options, cb);
 }
 
-function connectAndErase(mongoose, dbURI) {
+function connectAndErase(mongoose, dbURI, options) {
+  options = options || {};
   return function(done) {
     async.series([
       function(cb) {
-        connect(mongoose, dbURI, cb);
+        connect(mongoose, dbURI, options, cb);
       },
       function(cb) {
         erase(mongoose, cb);
