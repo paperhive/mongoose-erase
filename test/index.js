@@ -26,7 +26,14 @@ describe('erase()', () => {
   it('should remove collections', function assertDeletion(done) {
     mongoose.connection.db.collections((err, collections) => {
       if (err) {return done(err);}
-      collections.should.have.lengthOf(1);
+      // On older MongoDB installations, a collection "system.indexes" is
+      // always present.
+      if (collections.length > 0 &&
+        collections[0].collectionName.match(/^system\./)) {
+        collections.should.have.lengthOf(1);
+      } else {
+        collections.should.have.lengthOf(0);
+      }
       done();
     });
   });
