@@ -16,7 +16,7 @@ function mochaAsync(fn) {
   };
 }
 
-describe('erase()', function lol() {
+describe('erase()', () => {
   before(mochaAsync(function* () {
     yield connectAndErase(mongoose, dbURI);
 
