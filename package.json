@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/paperhive/mongoose-erase",
   "devDependencies": {
+    "babel-core": "^6.3.26",
     "blanket": "^1.1.7",
     "coveralls": "^2.11.4",
     "eslint": "^1.9.0",
