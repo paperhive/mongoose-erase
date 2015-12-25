@@ -56,7 +56,7 @@ function connectAndErase(mongoose, dbURI, options) {
 }
 
 module.exports = {
-  connect: connect,
-  erase: erase,
-  connectAndErase: connectAndErase,
+  connect,
+  erase,
+  connectAndErase,
 };
