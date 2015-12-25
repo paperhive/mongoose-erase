@@ -1,62 +1,43 @@
-const async = require('async');
+import { promisify } from 'bluebird';
+import co from 'co';
 
 // requires mongoose to be connected to the database
-function erase(mongoose, done) {
-  async.waterfall([
-    // ensure a database connection is established
-    (cb) => {
-      if (!mongoose.connection.db) {
-        return cb(new Error('no established database connection'));
-      }
-      cb();
-    },
-    // get collections
-    (cb) => {
-      mongoose.connection.db.collections(cb);
-    },
-    // drop collections
-    (collections, cb) => {
-      async.each(collections, (collection, eachCb) => {
-        if (collection.collectionName.match(/^system\./)) {return eachCb();}
-        // drop collection
-        collection.drop(eachCb);
-      }, cb);
-    },
-    // reset mongoose models
-    (cb) => {
-      mongoose.connection.models = {};
-      mongoose.models = {};
-      mongoose.modelSchemas = {};
-      cb();
-    },
-    // // ensureIndexes
-    // _.map(models, function (model) {
-    //   return model.ensureIndexes.bind(model);
-    // })
-  ], done);
-}
+export const erase = co.wrap(function* erase(mongoose) {
+  // ensure a database connection is established
+  if (!mongoose.connection.db) {
+    throw new Error('no established database connection');
+  }
 
-function connect(mongoose, dbURI, options, cb) {
-  if (mongoose.connection.db) {return cb();}
-  mongoose.connect(dbURI, options, cb);
-}
+  // get collections
+  const collections = yield promisify(
+    mongoose.connection.db.collections,
+    {context: mongoose.connection.db}
+  );
 
-function connectAndErase(mongoose, dbURI, options) {
+  // drop collections
+  yield collections.map(co.wrap((collection) => {
+    // Older MongoDB installations featur system.* collections; leave those
+    // untouched.
+    if (!collection.collectionName.match(/^system\./)) {
+      // drop collection
+      collection.drop();
+    }
+  }));
+
+  // reset mongoose models
+  mongoose.connection.models = {};
+  mongoose.models = {};
+  mongoose.modelSchemas = {};
+});
+
+export const connect = co.wrap(function* connect(mongoose, dbURI, options) {
+  if (mongoose.connection.db) {return;}
   const newOptions = options || {};
-  return (done) => {
-    async.series([
-      (cb) => {
-        connect(mongoose, dbURI, newOptions, cb);
-      },
-      (cb) => {
-        erase(mongoose, cb);
-      },
-    ], done);
-  };
-}
+  yield promisify(mongoose.connect, {context: mongoose})(dbURI, options);
+});
 
-module.exports = {
-  connect,
-  erase,
-  connectAndErase,
-};
+export const connectAndErase = co.wrap(function* connectAndErase(mongoose, dbURI, options) {
+  const newOptions = options || {};
+  yield connect(mongoose, dbURI, newOptions);
+  yield erase(mongoose);
+});

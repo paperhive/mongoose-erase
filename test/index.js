@@ -1,42 +1,49 @@
-const dbURI = 'mongodb://localhost/mongoose-erase';
-const mongoose = require('mongoose');
-const async = require('async');
+import { promisify } from 'bluebird';
+import co from 'co';
+import mongoose from 'mongoose';
 
-const erase = require('../');
+import { connect, connectAndErase, erase } from '../src';
 
-describe('erase()', () => {
-  before((done) => {
-    async.series([
-      // make sure that database is connected and erase it
-      erase.connectAndErase(mongoose, dbURI),
-      // add collection users
-      (cb) => {
-        const User = mongoose.model('User', new mongoose.Schema({
-          name: {type: String, index: true},
-        }));
-        User.create({name: 'Darth'}, cb);
-      },
-      // erase
-      (cb) => {
-        erase.erase(mongoose, cb);
-      },
-    ], done);
-  });
+const dbURI = 'mongodb://localhost/test';
 
-  it('should remove collections', function assertDeletion(done) {
-    mongoose.connection.db.collections((err, collections) => {
-      if (err) {return done(err);}
-      // On older MongoDB installations, a collection "system.indexes" is
-      // always present.
-      if (collections.length > 0 &&
+// generator/yield-version of the async/await-based mochaAsync
+function mochaAsync(fn) {
+  return function (done) {
+    const ctx = this;
+    co(function* () {
+      yield fn(ctx);
+    }).then(done, done);
+  };
+}
+
+describe('erase()', function lol() {
+  before(mochaAsync(function* () {
+    yield connectAndErase(mongoose, dbURI);
+
+    const User = mongoose.model('User', new mongoose.Schema({
+      name: {type: String, index: true},
+    }));
+    yield User.create({name: 'Darth'});
+
+    yield erase(mongoose);
+  }));
+
+  it('should remove collections', mochaAsync(function* () {
+    // get collections
+    const collections = yield promisify(
+      mongoose.connection.db.collections,
+      {context: mongoose.connection.db}
+    );
+
+    // On older MongoDB installations, a collection "system.indexes" is
+    // always present.
+    if (collections.length > 0 &&
         collections[0].collectionName.match(/^system\./)) {
-        collections.should.have.lengthOf(1);
-      } else {
-        collections.should.have.lengthOf(0);
-      }
-      done();
-    });
-  });
+      collections.should.have.lengthOf(1);
+    } else {
+      collections.should.have.lengthOf(0);
+    }
+  }));
 
   it('should remove models', () => {
     (() => {
