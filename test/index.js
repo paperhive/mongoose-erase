@@ -2,7 +2,7 @@ import { promisify } from 'bluebird';
 import co from 'co';
 import mongoose from 'mongoose';
 
-import { connect, connectAndErase, erase } from '../src';
+import { connectAndErase, erase } from '../src';
 
 const dbURI = 'mongodb://localhost/test';
 
