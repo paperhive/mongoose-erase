@@ -1,42 +1,53 @@
-var dbURI = 'mongodb://localhost/mongoose-erase';
-var mongoose = require('mongoose');
-var async = require('async');
-var should = require('should');
+import { promisify } from 'bluebird';
+import co from 'co';
+import mongoose from 'mongoose';
 
-var erase = require('../');
+import { connectAndErase, erase } from '../src';
 
-describe('erase()', function() {
+const dbURI = 'mongodb://localhost/test';
 
-  before(function(done) {
-    async.series([
-      // make sure that database is connected and erase it
-      erase.connectAndErase(mongoose, dbURI),
-      // add collection users
-      function(cb) {
-        var User = mongoose.model('User', new mongoose.Schema({
-          name: {type: String, index: true}
-        }));
-        User.create({name: 'Darth'}, cb);
-      },
-      // erase
-      function(cb) {
-        erase.erase(mongoose, cb);
-      }
-    ], done);
-  });
+// generator/yield-version of the async/await-based mochaAsync
+function mochaAsync(fn) {
+  return function (done) {
+    const ctx = this;
+    co(function* () {
+      yield fn(ctx);
+    }).then(done, done);
+  };
+}
 
-  it('should remove collections', function(done) {
-    mongoose.connection.db.collections(function(err, collections) {
-      if (err) {return done(err);}
+describe('erase()', () => {
+  before(mochaAsync(function* () {
+    yield connectAndErase(mongoose, dbURI);
+
+    const User = mongoose.model('User', new mongoose.Schema({
+      name: {type: String, index: true},
+    }));
+    yield User.create({name: 'Darth'});
+
+    yield erase(mongoose);
+  }));
+
+  it('should remove collections', mochaAsync(function* () {
+    // get collections
+    const collections = yield promisify(
+      mongoose.connection.db.collections,
+      {context: mongoose.connection.db}
+    );
+
+    // On older MongoDB installations, a collection "system.indexes" is
+    // always present.
+    if (collections.length > 0 &&
+        collections[0].collectionName.match(/^system\./)) {
       collections.should.have.lengthOf(1);
-      done();
-    });
-  });
+    } else {
+      collections.should.have.lengthOf(0);
+    }
+  }));
 
-  it('should remove models', function() {
-    (function() {
+  it('should remove models', () => {
+    (() => {
       mongoose.model('User');
     }).should.throw();
   });
-
 });
