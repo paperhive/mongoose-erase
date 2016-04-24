@@ -31,7 +31,7 @@ export const erase = co.wrap(function* erase(mongoose) {
 });
 
 export const connect = co.wrap(function* connect(mongoose, dbURI, options) {
-  if (mongoose.connection.db) {return;}
+  if (mongoose.connection.db) return;
   const newOptions = options || {};
   yield promisify(mongoose.connect, {context: mongoose})(dbURI, newOptions);
 });
