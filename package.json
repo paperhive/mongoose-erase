@@ -33,7 +33,7 @@
     "co": "^4.6.0"
   },
   "devDependencies": {
-    "babel-core": "^6.3.26",
+    "babel-core": "^6.18.2",
     "babel-preset-es2015": "^6.3.13",
     "blanket": "^1.2.1",
     "coveralls": "^2.11.6",
