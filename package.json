@@ -42,7 +42,7 @@
     "eslint-plugin-import": "^1.5.0",
     "mocha": "^3.0.0",
     "mocha-lcov-reporter": "1.2.0",
-    "mongoose": "^4.3.4",
+    "mongoose": "^4.6.6",
     "should": "^11.0.0"
   },
   "config": {
